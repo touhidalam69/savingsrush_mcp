@@ -33,11 +33,28 @@ export const handleListActiveUsers = async () => {
   return executeTool({
     name: 'list_active_users',
     cacheKey: 'users:active',
-    apiCall: async () => api.get<any[]>('/getActiveVerifiedUsers'),
-    transform: (users) => ({
-      users,
-      total: users.length,
-    }),
+    apiCall: async () => api.get<ActiveUsersResponse>('/getActiveVerifiedUsers'),
+    transform: (response) => {
+      const users = response?.data?.users || [];
+      const cleanedUsers = users.map((user) => ({
+        name: user.full_name,
+        slug: user.slug,
+        profile_url: `https://savingsrush.com/coupon-expert/${user.slug}/`,
+        avatar: user.userimageurl || null,
+        designation: user.designation || null,
+        bio: user.meta_description || null,
+        email: user.email
+      }));
+
+      return {
+        users: cleanedUsers,
+        total: cleanedUsers.length
+      };
+    }
+    // transform: (users) => ({
+    //   users,
+    //   total: users.length,
+    // }),
   });
 };
 
@@ -54,4 +71,27 @@ export const handleGetUser = async (args: any) => {
     apiCall: async () => api.get<any>(`/getUserBySlug`, { slug }),
     transform: (user) => user,
   });
+};
+
+type User = {
+  id: number;
+  username: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  is_verified: boolean;
+  status: string;
+  userrole: string;
+  userimageurl: string;
+  slug: string;
+  updated_at: string;
+  designation: string;
+  meta_description: string;
+};
+
+type ActiveUsersResponse = {
+  message: string;
+  data: {
+    users: User[];
+  };
 };

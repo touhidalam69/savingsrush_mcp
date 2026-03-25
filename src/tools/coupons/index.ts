@@ -12,7 +12,7 @@ export const getCouponsToolDef = {
   inputSchema: {
     type: 'object',
     properties: {
-      url: { type: 'string', description: 'Website URL (e.g. "amazon.com")' },
+      url: { type: 'string', description: 'Website URL (e.g. "fabrilife.com")' },
     },
     required: ['url'],
   },
@@ -20,7 +20,7 @@ export const getCouponsToolDef = {
 
 export const findCouponsToolDef = {
   name: 'find_coupons_by_site_name',
-  description: 'Find coupons by fuzzy matching a site name (e.g. "amazon" -> "amazon.com")',
+  description: 'Find coupons by fuzzy matching a site name (e.g. "fabrilife" -> "fabrilife.com")',
   inputSchema: {
     type: 'object',
     properties: {
