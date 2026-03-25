@@ -1,0 +1,68 @@
+name: savingsrush-mcp
+version: 1
+description: Production-ready MCP server for SavingsRush providing tools for users, websites, coupons, and blogs with built-in caching and smart search.
+author: Touhid
+license: MIT
+runtime: typescript
+transports:
+  - sse
+
+engines:
+  node: ">=18.0.0"
+
+mcp:
+  tools:
+    - name: list_active_users
+      description: List active verified users on SavingsRush
+    - name: get_user
+      description: Get user details by slug
+      parameters:
+        type: object
+        properties:
+          slug:
+            type: string
+            description: User slug (e.g. 'john-doe')
+        required:
+          - slug
+    - name: list_websites
+      description: List active websites on SavingsRush
+    - name: list_top_websites
+      description: List top websites on SavingsRush
+    - name: get_coupons
+      description: Get coupons for a specific website URL
+      parameters:
+        type: object
+        properties:
+          url:
+            type: string
+            description: Website URL (e.g. 'amazon.com')
+        required:
+          - url
+    - name: list_blogs
+      description: List published blogs on SavingsRush
+    - name: find_coupons_by_site_name
+      description: Find coupons by fuzzy matching a site name (e.g. 'amazon' -> 'amazon.com')
+      parameters:
+        type: object
+        properties:
+          site_name:
+            type: string
+            description: Name of the website
+        required:
+          - site_name
+
+install: npm install
+build: 
+  command: npm run build
+  dist: dist
+
+env:
+  PORT:
+    description: Port for the HTTP/SSE server
+    default: "8080"
+  BASE_URL:
+    description: Base URL for the SavingsRush public API
+    default: "https://savingsrush.com/api/public"
+  CACHE_TTL:
+    description: Cache TTL in seconds
+    default: "3600"
