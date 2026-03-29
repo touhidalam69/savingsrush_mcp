@@ -7,8 +7,8 @@ const api = ApiClient.getInstance();
 
 // Tool Definitions
 export const listActiveUsersToolDef = {
-  name: 'list_active_users',
-  description: 'List active verified users on SavingsRush',
+  name: 'list_active_coupon_expert',
+  description: 'List active verified coupon expert on SavingsRush',
   inputSchema: {
     type: 'object',
     properties: {},
@@ -17,12 +17,12 @@ export const listActiveUsersToolDef = {
 };
 
 export const getUserToolDef = {
-  name: 'get_user',
-  description: 'Get user details by slug',
+  name: 'get_coupon_expert',
+  description: 'Get coupon expert details by slug',
   inputSchema: {
     type: 'object',
     properties: {
-      slug: { type: 'string', description: 'User slug (e.g. "john-doe")' },
+      slug: { type: 'string', description: 'coupon expert slug (e.g. "john-doe")' },
     },
     required: ['slug'],
   },
@@ -31,8 +31,8 @@ export const getUserToolDef = {
 // Handlers
 export const handleListActiveUsers = async () => {
   return executeTool({
-    name: 'list_active_users',
-    cacheKey: 'users:active',
+    name: 'list_active_coupon_expert',
+    cacheKey: 'coupon_expert:active',
     apiCall: async () => api.get<ActiveUsersResponse>('/getActiveVerifiedUsers'),
     transform: (response) => {
       const users = response?.data?.users || [];
@@ -47,7 +47,7 @@ export const handleListActiveUsers = async () => {
       }));
 
       return {
-        users: cleanedUsers,
+        coupon_expert: cleanedUsers,
         total: cleanedUsers.length
       };
     }
@@ -66,8 +66,8 @@ export const handleGetUser = async (args: any) => {
   if (!slug) throw new Error('Slug is required');
 
   return executeTool({
-    name: 'get_user',
-    cacheKey: `user:${slug}`,
+    name: 'get_coupon_expert',
+    cacheKey: `coupon_expert:${slug}`,
     apiCall: async () => api.get<any>(`/getUserBySlug`, { slug }),
     transform: (user) => user,
   });

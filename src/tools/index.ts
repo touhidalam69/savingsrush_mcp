@@ -1,6 +1,6 @@
 import { listActiveUsersToolDef, getUserToolDef, handleListActiveUsers, handleGetUser } from './users';
 import { listWebsitesToolDef, listTopWebsitesToolDef, handleListWebsites, handleListTopWebsites } from './websites';
-import { getCouponsToolDef, findCouponsToolDef, handleGetCoupons, handleFindCoupons } from './coupons';
+import { getCouponsToolDef, handleGetCoupons } from './coupons';
 import { listBlogsToolDef, handleListBlogs } from './blogs';
 
 export const tools = [
@@ -9,15 +9,14 @@ export const tools = [
   listWebsitesToolDef,
   listTopWebsitesToolDef,
   getCouponsToolDef,
-  findCouponsToolDef,
   listBlogsToolDef,
 ];
 
 export const handleToolCall = async (name: string, args: any) => {
   switch (name) {
-    case 'list_active_users':
+    case 'list_active_coupon_expert':
       return handleListActiveUsers();
-    case 'get_user':
+    case 'get_coupon_expert':
       return handleGetUser(args);
     case 'list_websites':
       return handleListWebsites();
@@ -25,8 +24,6 @@ export const handleToolCall = async (name: string, args: any) => {
       return handleListTopWebsites();
     case 'get_coupons':
       return handleGetCoupons(args);
-    case 'find_coupons_by_site_name':
-      return handleFindCoupons(args);
     case 'list_blogs':
       return handleListBlogs();
     default:

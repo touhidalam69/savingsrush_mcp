@@ -18,18 +18,6 @@ export const getCouponsToolDef = {
   },
 };
 
-export const findCouponsToolDef = {
-  name: 'find_coupons_by_site_name',
-  description: 'Find coupons by fuzzy matching a site name (e.g. "fabrilife" -> "fabrilife.com")',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      site_name: { type: 'string', description: 'Name of the website' },
-    },
-    required: ['site_name'],
-  },
-};
-
 // Handlers
 export const handleGetCoupons = async (args: any) => {
   const url = normalizeUrl(args.url);
@@ -38,74 +26,76 @@ export const handleGetCoupons = async (args: any) => {
   return executeTool({
     name: 'get_coupons',
     cacheKey: `coupons:${url}`,
-    apiCall: async () => api.get<any[]>(`/getCouponsByWebsiteUrl`, { url }),
-    transform: (coupons) => ({
-      url,
-      coupons,
-      total: coupons.length,
-    }),
+    apiCall: async () =>
+      api.get<CouponsResponse>(`/getCouponsByWebsiteUrl`, { url }),
+
+    transform: (response: CouponsResponse) => {
+      const { websiteinfo, coupons } = response.data;
+
+      const cleanedCoupons = coupons.map((coupon: Coupon) => ({
+        promo_code_or_discount_link: coupon.coupon_code,
+        description: coupon.description,
+
+        // 🔥 normalized discount
+        discount:
+          coupon.discount_type === 'percentage'
+            ? `${coupon.discount_percent}%`
+            : coupon.discount_amount,
+
+        type: coupon.iscoupon === 1 ? 'coupon' : 'deal',
+
+        expiry: coupon.expiration_date,
+        is_active: coupon.status === 'active'
+
+        // 🔥 AI-friendly label
+        //summary: `${coupon.discount_percent}% off - ${coupon.description}`
+      }));
+
+      return {
+        website: {
+          name: websiteinfo.name,
+          url: websiteinfo.url,
+          category: websiteinfo.category,
+          logo: websiteinfo.image_url,
+          details_link: `https://savingsrush.com/coupon-codes/${websiteinfo.url}/`,
+          referral_link: websiteinfo.discount_link,
+          coupon_expert_slug: websiteinfo.user_slug
+        },
+
+        coupons: cleanedCoupons,
+        total: cleanedCoupons.length
+      };
+    }
   });
 };
 
-export const handleFindCoupons = async (args: any) => {
-  const siteName = args.site_name;
-  if (!siteName) throw new Error('Site name is required');
 
-  return executeTool({
-    name: 'find_coupons_by_site_name',
-    cacheKey: `find:${siteName.toLowerCase().trim()}`,
-    apiCall: async () => {
-      // 1. Fetch websites (using the cached handler)
-      const websitesResult = await handleListWebsites();
-      
-      if (!websitesResult.success) {
-        throw new Error('Failed to fetch websites list for lookup');
-      }
+type WebsiteInfo = {
+  name: string;
+  url: string;
+  image_url: string;
+  category: string;
+  discount_link: string;
+  user_slug: string;
+};
 
-      // Type guard/cast to access success properties
-      const successResult = websitesResult as { success: true; data: any; cached: boolean };
-      const websites: any[] = successResult.data.websites;
-      const normalizedQuery = siteName.toLowerCase().trim();
+type Coupon = {
+  coupon_code: string;
+  description: string;
+  discount_amount: string;
+  discount_type: string;
+  expiration_date: string;
+  usage_limit: number | null;
+  used_count: number;
+  status: string;
+  discount_percent: string;
+  iscoupon: number;
+};
 
-      // 2. Fuzzy match / Best match
-      let bestMatch: any = null;
-
-      // Simple heuristic: find first exact match
-      bestMatch = websites.find((w: any) => {
-        const wName = (w.name || '').toLowerCase();
-        const wUrl = (w.websiteUrl || w.url || '').toLowerCase();
-        return wName === normalizedQuery || wUrl === normalizedQuery;
-      });
-
-      if (!bestMatch) {
-        // Try partial match
-        bestMatch = websites.find((w: any) => {
-          const wName = (w.name || '').toLowerCase();
-          const wUrl = (w.websiteUrl || w.url || '').toLowerCase();
-          return wName.includes(normalizedQuery) || wUrl.includes(normalizedQuery);
-        });
-      }
-
-      if (!bestMatch) {
-         throw new Error(`No website found matching "${siteName}". Please try a different name.`);
-      }
-
-      // 3. Resolve URL
-      const matchedUrl = bestMatch.websiteUrl || bestMatch.url;
-      if (!matchedUrl) {
-        throw new Error(`Found website "${bestMatch.name}" but it has no URL.`);
-      }
-
-      // 4. Call handleGetCoupons logic directly (to avoid double wrapping in executeTool if desired, 
-      // but calling it is fine because executeTool handles nested cache hits gracefully)
-      const couponsResult = await handleGetCoupons({ url: matchedUrl });
-      if (!couponsResult.success) {
-        const errorResult = couponsResult as { success: false; message: string };
-        throw new Error(`Failed to fetch coupons for matched site: ${errorResult.message}`);
-      }
-      
-      return (couponsResult as { success: true; data: any }).data;
-    },
-    transform: (data) => data, // Coupons already transformed by handleGetCoupons
-  });
+type CouponsResponse = {
+  success: boolean;
+  data: {
+    websiteinfo: WebsiteInfo;
+    coupons: Coupon[];
+  };
 };
