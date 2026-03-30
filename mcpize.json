@@ -56,6 +56,63 @@
         "name": "list_blogs",
         "description": "List published blogs on SavingsRush"
       }
+    ],
+    "prompts": [
+      {
+        "name": "find_best_coupons_for_store",
+        "description": "Guide the client to fetch and present the best available coupons for a store URL.",
+        "arguments": [
+          {
+            "name": "url",
+            "description": "Store website URL such as 'fabrilife.com'.",
+            "required": true
+          },
+          {
+            "name": "goal",
+            "description": "Optional savings goal such as 'highest discount' or 'working coupon code'.",
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "recommend_top_stores",
+        "description": "Guide the client to review top SavingsRush stores and recommend the most relevant ones.",
+        "arguments": [
+          {
+            "name": "audience",
+            "description": "Optional audience or shopping intent such as 'fashion shoppers' or 'students'.",
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "show_coupon_expert_profile",
+        "description": "Guide the client to fetch and present a coupon expert profile by slug.",
+        "arguments": [
+          {
+            "name": "slug",
+            "description": "Coupon expert slug such as 'john-doe'.",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "uri": "savingsrush://server/about",
+        "name": "server-about",
+        "description": "Overview of the SavingsRush MCP server, its purpose, and its supported MCP capabilities."
+      },
+      {
+        "uri": "savingsrush://tools/catalog",
+        "name": "tools-catalog",
+        "description": "Catalog of available SavingsRush MCP tools with usage guidance."
+      },
+      {
+        "uri": "savingsrush://examples/sample-queries",
+        "name": "sample-queries",
+        "description": "Example user requests and the corresponding SavingsRush MCP tools to use."
+      }
     ]
   },
   "install": "npm install",
@@ -77,7 +134,7 @@
   },
   "capabilities": {
     "tools": true,
-    "resources": false,
-    "prompts": false
+    "resources": true,
+    "prompts": true
   }
 }

@@ -28,6 +28,8 @@ It includes:
 - input normalization
 - reusable API client
 - structured tool responses for MCP clients
+- MCP prompts for common SavingsRush workflows
+- MCP resources for server info, tool catalog, and examples
 
 ## Available Tools
 
@@ -37,6 +39,18 @@ It includes:
 - `list_top_websites`
 - `get_coupons`
 - `list_blogs`
+
+## Available Prompts
+
+- `find_best_coupons_for_store`
+- `recommend_top_stores`
+- `show_coupon_expert_profile`
+
+## Available Resources
+
+- `savingsrush://server/about`
+- `savingsrush://tools/catalog`
+- `savingsrush://examples/sample-queries`
 
 ## Environment Variables
 

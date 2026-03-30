@@ -4,12 +4,18 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
+  GetPromptRequestSchema,
   isInitializeRequest,
+  ListPromptsRequestSchema,
+  ListResourcesRequestSchema,
   ListToolsRequestSchema,
+  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { config } from '../config/config';
 import { Logger } from '../utils/logger';
 import { tools, handleToolCall } from '../tools';
+import { prompts, getPromptByName } from '../prompts';
+import { resources, readResourceByUri } from '../resources';
 
 export class HttpServer {
   private app: express.Application;
@@ -35,6 +41,8 @@ export class HttpServer {
       {
         capabilities: {
           tools: {},
+          prompts: {},
+          resources: {},
         },
       }
     );
@@ -48,6 +56,43 @@ export class HttpServer {
           inputSchema: tool.inputSchema,
         })),
       };
+    });
+
+    mcpServer.setRequestHandler(ListPromptsRequestSchema, async () => {
+      Logger.debug('Handling ListPromptsRequest');
+      return {
+        prompts: prompts.map((prompt) => ({
+          name: prompt.name,
+          title: prompt.title,
+          description: prompt.description,
+          arguments: prompt.arguments,
+        })),
+      };
+    });
+
+    mcpServer.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+      Logger.info(`Handling GetPromptRequest: ${name}`, args);
+      return getPromptByName(name, args);
+    });
+
+    mcpServer.setRequestHandler(ListResourcesRequestSchema, async () => {
+      Logger.debug('Handling ListResourcesRequest');
+      return {
+        resources: resources.map((resource) => ({
+          uri: resource.uri,
+          name: resource.name,
+          title: resource.title,
+          description: resource.description,
+          mimeType: resource.mimeType,
+        })),
+      };
+    });
+
+    mcpServer.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+      const { uri } = request.params;
+      Logger.info(`Handling ReadResourceRequest: ${uri}`);
+      return readResourceByUri(uri);
     });
 
     mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
