@@ -1,11 +1,9 @@
 import { executeTool } from '../utils';
 import { ApiClient } from '../../services/apiClient';
 import { normalizeUrl } from '../../services/normalizer';
-import { handleListWebsites } from '../websites';
 
 const api = ApiClient.getInstance();
 
-// Tool Definitions
 export const getCouponsToolDef = {
   name: 'get_coupons',
   description: 'Get coupons for a specific website URL',
@@ -18,7 +16,6 @@ export const getCouponsToolDef = {
   },
 };
 
-// Handlers
 export const handleGetCoupons = async (args: any) => {
   const url = normalizeUrl(args.url);
   if (!url) throw new Error('URL is required');
@@ -26,29 +23,20 @@ export const handleGetCoupons = async (args: any) => {
   return executeTool({
     name: 'get_coupons',
     cacheKey: `coupons:${url}`,
-    apiCall: async () =>
-      api.get<CouponsResponse>(`/getCouponsByWebsiteUrl`, { url }),
-
+    apiCall: async () => api.get<CouponsResponse>('/getCouponsByWebsiteUrl', { url }),
     transform: (response: CouponsResponse) => {
       const { websiteinfo, coupons } = response.data;
 
       const cleanedCoupons = coupons.map((coupon: Coupon) => ({
         promo_code_or_discount_link: coupon.coupon_code,
         description: coupon.description,
-
-        // 🔥 normalized discount
         discount:
           coupon.discount_type === 'percentage'
             ? `${coupon.discount_percent}%`
             : coupon.discount_amount,
-
         type: coupon.iscoupon === 1 ? 'coupon' : 'deal',
-
         expiry: coupon.expiration_date,
-        is_active: coupon.status === 'active'
-
-        // 🔥 AI-friendly label
-        //summary: `${coupon.discount_percent}% off - ${coupon.description}`
+        is_active: coupon.status === 'active',
       }));
 
       return {
@@ -59,16 +47,14 @@ export const handleGetCoupons = async (args: any) => {
           logo: websiteinfo.image_url,
           details_link: `https://savingsrush.com/coupon-codes/${websiteinfo.url}/`,
           referral_link: websiteinfo.discount_link,
-          coupon_expert_slug: websiteinfo.user_slug
+          coupon_expert_slug: websiteinfo.user_slug,
         },
-
         coupons: cleanedCoupons,
-        total: cleanedCoupons.length
+        total: cleanedCoupons.length,
       };
-    }
+    },
   });
 };
-
 
 type WebsiteInfo = {
   name: string;

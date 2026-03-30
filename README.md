@@ -31,12 +31,11 @@ It includes:
 
 ## Available Tools
 
-- `list_active_users`
-- `get_user`
+- `list_active_coupon_expert`
+- `get_coupon_expert`
 - `list_websites`
 - `list_top_websites`
 - `get_coupons`
-- `find_coupons_by_site_name`
 - `list_blogs`
 
 ## Environment Variables

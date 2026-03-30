@@ -9,18 +9,18 @@
   "mcp": {
     "tools": [
       {
-        "name": "list_active_users",
-        "description": "List active verified users on SavingsRush"
+        "name": "list_active_coupon_expert",
+        "description": "List active verified coupon expert on SavingsRush"
       },
       {
-        "name": "get_user",
-        "description": "Get user details by slug",
+        "name": "get_coupon_expert",
+        "description": "Get coupon expert details by slug",
         "parameters": {
           "type": "object",
           "properties": {
             "slug": {
               "type": "string",
-              "description": "User slug (e.g. 'john-doe')"
+              "description": "coupon expert slug (e.g. 'john-doe')"
             }
           },
           "required": [
@@ -55,22 +55,6 @@
       {
         "name": "list_blogs",
         "description": "List published blogs on SavingsRush"
-      },
-      {
-        "name": "find_coupons_by_site_name",
-        "description": "Find coupons by fuzzy matching a site name (e.g. 'fabrilife' -> 'fabrilife.com')",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "site_name": {
-              "type": "string",
-              "description": "Name of the website"
-            }
-          },
-          "required": [
-            "site_name"
-          ]
-        }
       }
     ]
   },
