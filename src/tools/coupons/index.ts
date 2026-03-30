@@ -1,6 +1,8 @@
 import { executeTool } from '../utils';
 import { ApiClient } from '../../services/apiClient';
 import { normalizeUrl } from '../../services/normalizer';
+import { handleListWebsites } from '../websites';
+import { formatError } from '../../utils/responseFormatter';
 
 const api = ApiClient.getInstance();
 
@@ -19,6 +21,21 @@ export const getCouponsToolDef = {
 export const handleGetCoupons = async (args: any) => {
   const url = normalizeUrl(args.url);
   if (!url) throw new Error('URL is required');
+
+  const websitesResult = await handleListWebsites();
+  if (!websitesResult.success) {
+    return websitesResult;
+  }
+
+  const websites =
+    'data' in websitesResult && Array.isArray(websitesResult.data.websites)
+      ? websitesResult.data.websites
+      : [];
+  const websiteExists = websites.some((website: { url?: string }) => normalizeUrl(website.url || '') === url);
+
+  if (!websiteExists) {
+    return formatError(`coupon not available for ${url}`);
+  }
 
   return executeTool({
     name: 'get_coupons',
