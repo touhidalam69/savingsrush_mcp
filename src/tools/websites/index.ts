@@ -29,10 +29,21 @@ export const handleListWebsites = async () => {
   return executeTool({
     name: 'list_websites',
     cacheKey: 'websites:active',
-    apiCall: async () => api.get<any[]>('/getActiveWebsites'),
-    transform: (websites) => ({
-      websites,
-    }),
+    apiCall: async () => api.get<WebsitesResponse>('/getActiveWebsites'),
+    transform: (response) => {
+      const websites = response?.data?.websites || [];
+      const cleanedwebsite = websites.map((website) => ({
+        url: website.url,
+        category: website.category,
+        name: website.name,
+        savingsrush_url: `https://savingsrush.com/coupon-codes/${website.url}/`,
+      }));
+
+      return {
+        websites: cleanedwebsite,
+        total: cleanedwebsite.length,
+      };
+    },
   });
 };
 
@@ -40,9 +51,40 @@ export const handleListTopWebsites = async () => {
   return executeTool({
     name: 'list_top_websites',
     cacheKey: 'websites:top',
-    apiCall: async () => api.get<any[]>('/getTopWebsite'), // API name is singular in prompt
-    transform: (websites) => ({
-      websites,
-    }),
+    apiCall: async () => api.get<WebsitesResponse>('/getTopWebsite'), // API name is singular in prompt
+    transform: (response) => {
+      const websites = response?.data?.websites || [];
+      const cleanedwebsite = websites.map((website) => ({
+        url: website.url,
+        category: website.category,
+        name: website.name,
+        coupon_code: website.coupon_code,
+        description: website.description,
+        used_count: website.used_count,
+        savingsrush_url: `https://savingsrush.com/coupon-codes/${website.url}/`,
+      }));
+
+      return {
+        websites: cleanedwebsite,
+        total: cleanedwebsite.length,
+      };
+    },
   });
+};
+
+
+type websites = {
+  url: string;
+  category: string;
+  name: string;
+  coupon_code: string;
+  description: string;
+  used_count: number;
+};
+
+type WebsitesResponse = {
+  message: string;
+  data: {
+    websites: websites[];
+  };
 };
