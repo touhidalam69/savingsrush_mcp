@@ -1,7 +1,6 @@
 import { CacheService } from '../services/cacheService';
-import { ApiClient } from '../services/apiClient';
 import { Logger } from '../utils/logger';
-import { formatSuccess, formatError } from '../utils/responseFormatter';
+import { formatSuccess, formatError, ErrorResponse, SuccessResponse, getErrorMessage } from '../utils/responseFormatter';
 
 export interface ToolExecutionOptions<TRaw, TTransformed> {
   name: string;
@@ -12,13 +11,13 @@ export interface ToolExecutionOptions<TRaw, TTransformed> {
 
 export const executeTool = async <TRaw, TTransformed>(
   options: ToolExecutionOptions<TRaw, TTransformed>
-) => {
+): Promise<SuccessResponse<TTransformed> | ErrorResponse> => {
   const cache = CacheService.getInstance();
   const { name, cacheKey, apiCall, transform } = options;
 
   try {
     // 1. Check Cache
-    const cachedData = cache.get(cacheKey);
+    const cachedData = cache.get<TTransformed>(cacheKey);
     if (cachedData) {
       Logger.info(`[${name}] Cache HIT: ${cacheKey}`);
       return formatSuccess(cachedData, true);
@@ -36,8 +35,9 @@ export const executeTool = async <TRaw, TTransformed>(
 
     // 5. Return
     return formatSuccess(transformedData, false);
-  } catch (error: any) {
-    Logger.error(`[${name}] Error: ${error.message}`);
-    return formatError(`Error executing tool ${name}: ${error.message}`, error);
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
+    Logger.error(`[${name}] Error: ${message}`);
+    return formatError(`Error executing tool ${name}: ${message}`, error);
   }
 };

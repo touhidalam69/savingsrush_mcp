@@ -1,6 +1,7 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { config } from '../config/config';
 import { Logger } from '../utils/logger';
+import { getErrorMessage } from '../utils/responseFormatter';
 
 export class ApiClient {
   private static instance: ApiClient;
@@ -33,16 +34,16 @@ export class ApiClient {
     return ApiClient.instance;
   }
 
-  async get<T>(url: string, params?: any): Promise<T> {
+  async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
     try {
       const response = await this.client.get<T>(url, { params });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         Logger.error(`API Error: ${error.message} - ${url}`, error.response?.data);
         throw new Error(`API Error: ${error.message}`);
       }
-      Logger.error(`Network Error: ${error.message} - ${url}`);
+      Logger.error(`Network Error: ${getErrorMessage(error)} - ${url}`);
       throw error;
     }
   }

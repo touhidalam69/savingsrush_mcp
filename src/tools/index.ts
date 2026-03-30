@@ -12,7 +12,7 @@ export const tools = [
   listBlogsToolDef,
 ];
 
-export const handleToolCall = async (name: string, args: any) => {
+export const handleToolCall = async (name: string, args?: Record<string, unknown>) => {
   switch (name) {
     case 'list_active_coupon_expert':
       return handleListActiveUsers();

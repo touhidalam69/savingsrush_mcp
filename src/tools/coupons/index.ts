@@ -18,8 +18,8 @@ export const getCouponsToolDef = {
   },
 };
 
-export const handleGetCoupons = async (args: any) => {
-  const url = normalizeUrl(args.url);
+export const handleGetCoupons = async (args?: Record<string, unknown>) => {
+  const url = normalizeUrl(typeof args?.url === 'string' ? args.url : '');
   if (!url) throw new Error('URL is required');
 
   const websitesResult = await handleListWebsites();
@@ -31,7 +31,7 @@ export const handleGetCoupons = async (args: any) => {
     'data' in websitesResult && Array.isArray(websitesResult.data.websites)
       ? websitesResult.data.websites
       : [];
-  const websiteExists = websites.some((website: { url?: string }) => normalizeUrl(website.url || '') === url);
+  const websiteExists = websites.some((website: WebsiteLookupItem) => normalizeUrl(website.url) === url);
 
   if (!websiteExists) {
     return formatError(`coupon not available for ${url}`);
@@ -71,6 +71,10 @@ export const handleGetCoupons = async (args: any) => {
       };
     },
   });
+};
+
+type WebsiteLookupItem = {
+  url: string;
 };
 
 type WebsiteInfo = {

@@ -32,7 +32,7 @@ export const handleListWebsites = async () => {
     apiCall: async () => api.get<WebsitesResponse>('/getActiveWebsites'),
     transform: (response) => {
       const websites = response?.data?.websites || [];
-      const cleanedwebsite = websites.map((website) => ({
+      const cleanedWebsites = websites.map((website) => ({
         url: website.url,
         category: website.category,
         name: website.name,
@@ -40,8 +40,8 @@ export const handleListWebsites = async () => {
       }));
 
       return {
-        websites: cleanedwebsite,
-        total: cleanedwebsite.length,
+        websites: cleanedWebsites,
+        total: cleanedWebsites.length,
       };
     },
   });
@@ -51,10 +51,10 @@ export const handleListTopWebsites = async () => {
   return executeTool({
     name: 'list_top_websites',
     cacheKey: 'websites:top',
-    apiCall: async () => api.get<WebsitesResponse>('/getTopWebsite'), // API name is singular in prompt
+    apiCall: async () => api.get<WebsitesResponse>('/getTopWebsite'),
     transform: (response) => {
       const websites = response?.data?.websites || [];
-      const cleanedwebsite = websites.map((website) => ({
+      const cleanedWebsites = websites.map((website) => ({
         url: website.url,
         category: website.category,
         name: website.name,
@@ -65,15 +65,14 @@ export const handleListTopWebsites = async () => {
       }));
 
       return {
-        websites: cleanedwebsite,
-        total: cleanedwebsite.length,
+        websites: cleanedWebsites,
+        total: cleanedWebsites.length,
       };
     },
   });
 };
 
-
-type websites = {
+type Website = {
   url: string;
   category: string;
   name: string;
@@ -85,6 +84,6 @@ type websites = {
 type WebsitesResponse = {
   message: string;
   data: {
-    websites: websites[];
+    websites: Website[];
   };
 };

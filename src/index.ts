@@ -8,7 +8,7 @@ async function main() {
     await httpServer.start();
     Logger.info('Application is up and running.');
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     Logger.error('CRITICAL: Failed to start server', error);
     process.exit(1);
   }

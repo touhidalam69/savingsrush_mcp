@@ -2,7 +2,7 @@ import { Logger } from '../utils/logger';
 import { config } from '../config/config';
 
 interface CacheEntry {
-  data: any;
+  data: unknown;
   expiry: number;
 }
 
@@ -23,7 +23,7 @@ export class CacheService {
     return CacheService.instance;
   }
 
-  get(key: string): any | null {
+  get<T>(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) {
       Logger.debug(`Cache MISS: ${key}`);
@@ -37,10 +37,10 @@ export class CacheService {
     }
 
     Logger.debug(`Cache HIT: ${key}`);
-    return entry.data;
+    return entry.data as T;
   }
 
-  set(key: string, data: any, ttl?: number): void {
+  set<T>(key: string, data: T, ttl?: number): void {
     const expiry = Date.now() + (ttl ? ttl * 1000 : this.defaultTtl);
     this.cache.set(key, { data, expiry });
     Logger.debug(`Cache SET: ${key}`);

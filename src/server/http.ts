@@ -13,6 +13,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { config } from '../config/config';
 import { Logger } from '../utils/logger';
+import { getErrorMessage } from '../utils/responseFormatter';
 import { tools, handleToolCall } from '../tools';
 import { prompts, getPromptByName } from '../prompts';
 import { resources, readResourceByUri } from '../resources';
@@ -105,13 +106,13 @@ export class HttpServer {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           isError: !result.success,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         Logger.error(`Tool call error: ${name}`, error);
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ success: false, message: error.message }),
+              text: JSON.stringify({ success: false, message: getErrorMessage(error) }),
             },
           ],
           isError: true,

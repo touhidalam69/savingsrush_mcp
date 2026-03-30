@@ -19,9 +19,7 @@ export const handleListBlogs = async () => {
   return executeTool({
     name: 'list_blogs',
     cacheKey: 'blogs:published',
-    apiCall: async () =>
-      api.get<BlogsResponse>('/getPublishedBlogs'),
-
+    apiCall: async () => api.get<BlogsResponse>('/getPublishedBlogs'),
     transform: (response: BlogsResponse) => {
       const blogs = response.data.blogs;
 
@@ -30,14 +28,14 @@ export const handleListBlogs = async () => {
         slug: blog.slug,
         url: `https://savingsrush.com/blog/${blog.slug}/`,
         summary: blog.excerpt,
-        last_updated: blog.updated_at
+        last_updated: blog.updated_at,
       }));
 
       return {
         blogs: cleanedBlogs,
-        total: cleanedBlogs.length
+        total: cleanedBlogs.length,
       };
-    }
+    },
   });
 };
 
@@ -45,7 +43,7 @@ type Blog = {
   title: string;
   slug: string;
   excerpt: string;
-  updated_at: Date;
+  updated_at: string;
 };
 
 type BlogsResponse = {
