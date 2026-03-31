@@ -1,44 +1,54 @@
 # SavingsRush MCP Server
 
-TypeScript MCP server for the public SavingsRush API, exposed over Streamable HTTP.
+TypeScript MCP server for the public SavingsRush API with support for:
 
-This MCP application is published and ready to use here:
+- MCP tools
+- MCP prompts
+- MCP resources
+- Streamable HTTP transport
+- stdio transport for local desktop/client use
+
+Published listing:
 
 - https://mcpize.com/mcp/savingsrush-mcp
 
-## Links
-
-- MCP listing: https://mcpize.com/mcp/savingsrush-mcp
-- Main website: https://savingsrush.com
-- Author website: https://touhidalam.com
-
 ## Overview
 
-This project wraps SavingsRush public APIs into MCP tools for:
+This project wraps SavingsRush public API endpoints into an MCP server focused on:
 
-- users
+- coupon experts
 - websites
-- coupons
+- coupons and deals
 - blogs
 
-It includes:
+The server exposes one shared MCP definition and can run in two modes:
 
-- Streamable HTTP MCP endpoint
-- in-memory caching
-- input normalization
-- reusable API client
-- structured tool responses for MCP clients
-- MCP prompts for common SavingsRush workflows
-- MCP resources for server info, tool catalog, and examples
+- `http`: serves MCP over `/mcp` using Streamable HTTP
+- `stdio`: serves MCP over stdin/stdout for local MCP clients like Claude Desktop
+
+## Features
+
+- Shared MCP server factory for tools, prompts, and resources
+- In-memory caching with configurable TTL
+- URL and slug normalization
+- Reusable Axios API client with retry handling
+- Structured success/error tool responses
+- Local stdio support for desktop MCP clients
 
 ## Available Tools
 
 - `list_active_coupon_expert`
+  Lists active verified coupon experts.
 - `get_coupon_expert`
+  Gets a coupon expert by `slug`.
 - `list_websites`
+  Lists active websites on SavingsRush.
 - `list_top_websites`
+  Lists top websites on SavingsRush.
 - `get_coupons`
+  Gets coupons for a website `url`. This first checks whether the URL exists in `list_websites`; if not, it returns a coupon-not-available response.
 - `list_blogs`
+  Lists published blogs.
 
 ## Available Prompts
 
@@ -52,59 +62,135 @@ It includes:
 - `savingsrush://tools/catalog`
 - `savingsrush://examples/sample-queries`
 
+## Project Structure
+
+```text
+src/
+  config/      Environment and runtime config
+  prompts/     MCP prompt definitions and prompt resolution
+  resources/   MCP resource definitions and resource reading
+  server/      Shared MCP server factory plus HTTP and stdio transports
+  services/    API client, cache service, normalizers
+  tools/       MCP tool definitions and handlers
+  utils/       Logging and response formatting helpers
+```
+
 ## Environment Variables
 
 ```env
 PORT=8080
 BASE_URL=https://savingsrush.com/api/public
-CACHE_TTL=3600
+CACHE_TTL=43200
 NODE_ENV=production
+TRANSPORT=http
 ```
 
-## Getting Started
+Notes:
 
-Install dependencies:
+- `CACHE_TTL` is in seconds.
+- `TRANSPORT` can be `http` or `stdio`.
+- You can also override transport with runtime flags: `--http` or `--stdio`.
+
+## Installation
 
 ```bash
 npm install
 ```
 
-Run in development:
+## Development
+
+Run in default HTTP mode:
 
 ```bash
 npm run dev
 ```
 
-Build:
+Run explicitly in HTTP mode:
+
+```bash
+npm run dev:http
+```
+
+Run in stdio mode:
+
+```bash
+npm run dev:stdio
+```
+
+## Build
 
 ```bash
 npm run build
 ```
 
-Start:
+## Production Run
+
+Start in default HTTP mode:
 
 ```bash
 npm start
 ```
 
-## Endpoints
+Start explicitly in HTTP mode:
+
+```bash
+npm run start:http
+```
+
+Start in stdio mode:
+
+```bash
+npm run start:stdio
+```
+
+You can also run the built server directly:
+
+```bash
+node dist/index.js --http
+node dist/index.js --stdio
+```
+
+## HTTP Endpoints
+
+When running in HTTP mode:
 
 - `GET /`
 - `GET /health`
 - `ALL /mcp`
 
-## Main Website
+When running in stdio mode, no HTTP endpoints are exposed.
 
-SavingsRush website:
+## Local Claude Desktop Example
 
-- https://savingsrush.com
+Example Windows config for local stdio usage:
 
-## Author
+```json
+{
+  "mcpServers": {
+    "savingsrush-local": {
+      "command": "node",
+      "args": [
+        "C:\\Github\\savingsrush_mcp\\dist\\index.js",
+        "--stdio"
+      ],
+      "env": {
+        "BASE_URL": "https://savingsrush.com/api/public",
+        "CACHE_TTL": "43200",
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
 
-Touhid Alam
+If `node` is not available in PATH, use the full path to `node.exe`.
 
-- Website: https://touhidalam.com
+## Links
+
+- MCP listing: https://mcpize.com/mcp/savingsrush-mcp
+- Main website: https://savingsrush.com
+- Author website: https://touhidalam.com
 
 ## License
 
-This repository uses the license declared in `package.json`.
+This repository uses the license declared in package.json
